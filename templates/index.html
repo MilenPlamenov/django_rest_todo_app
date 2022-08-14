@@ -116,6 +116,13 @@
         spanTitle.classList.add("title");
         spanTitle.innerHTML = task.name;
 
+        let editInput = document.createElement('input');
+
+        editInput.setAttribute("type", "hidden");
+        let editActionBtn = document.createElement('button');
+        editActionBtn.innerHTML = "Finalize";
+        editActionBtn.style.display = "none";
+
         let editDiv = document.createElement('div');
         editDiv.setAttribute("style", "flex:1");
         let editBtn = document.createElement('button');
@@ -125,20 +132,31 @@
         editBtn.classList.add("btn-outline-info");
         editBtn.classList.add("edit");
         editBtn.addEventListener("click", () => {
-            const url = `http://127.0.0.1:8000/api/todo-retrieve-update-destroy/${task.id}/`;
-            const csrftoken = getCookie('csrftoken');
-            let titleInput = document.getElementById("title");
-            titleInput.value = task.name;
-            let obj = JSON.stringify({name: titleInput.value});
 
-            fetch(url, {
-                method: "PUT",
-                headers: {
-                    'Content-type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                },
-                body: obj,
+            editInput.removeAttribute("type");
+            editActionBtn.style.display = "block";
+            editInput.value = task.name;
+            editActionBtn.addEventListener("click", () => {
+                const url = `http://127.0.0.1:8000/api/todo-retrieve-update-destroy/${task.id}/`;
+                const csrftoken = getCookie('csrftoken');
+                let obj = JSON.stringify({name: editInput.value});
+                fetch(url, {
+                    method: "PUT",
+                    headers: {
+                        'Content-type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: obj,
+                })
+                    .then(response => response.json())
+                    .then((data) => {
+                        task.name = data.name;
+                        spanTitle.innerHTML = data.name;
+                    })
+                editInput.setAttribute("type", "hidden");
+                editActionBtn.style.display = "none";
             })
+
         })
 
         let deleteDiv = document.createElement("div");
@@ -163,6 +181,8 @@
         })
 
         divTitle.appendChild(spanTitle);
+        divTitle.appendChild(editInput);
+        divTitle.appendChild(editActionBtn);
         editDiv.appendChild(editBtn);
         deleteDiv.appendChild(deleteBtn);
 
