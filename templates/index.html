@@ -87,6 +87,22 @@
 <script>
     listOfTodos()
 
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     function updateDom(task) {
         let listWrapperEl = document.getElementById("list-wrapper");
         let mainDivEl = document.createElement('div');
@@ -108,6 +124,22 @@
         editBtn.classList.add("btn-sm");
         editBtn.classList.add("btn-outline-info");
         editBtn.classList.add("edit");
+        editBtn.addEventListener("click", () => {
+            const url = `http://127.0.0.1:8000/api/todo-retrieve-update-destroy/${task.id}/`;
+            const csrftoken = getCookie('csrftoken');
+            let titleInput = document.getElementById("title");
+            titleInput.value = task.name;
+            let obj = JSON.stringify({name: titleInput.value});
+
+            fetch(url, {
+                method: "PUT",
+                headers: {
+                    'Content-type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: obj,
+            })
+        })
 
         let deleteDiv = document.createElement("div");
         editDiv.setAttribute("style", "flex:1");
@@ -117,6 +149,18 @@
         deleteBtn.classList.add("btn-sm");
         deleteBtn.classList.add("btn-outline-info");
         deleteBtn.classList.add("delete");
+        deleteBtn.addEventListener("click", () => {
+            const url = `http://127.0.0.1:8000/api/todo-retrieve-update-destroy/${task.id}/`;
+            const csrftoken = getCookie('csrftoken');
+            fetch(url, {
+                method: "DELETE",
+                headers: {
+                    'Content-type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+            })
+            deleteBtn.parentElement.parentElement.remove()
+        })
 
         divTitle.appendChild(spanTitle);
         editDiv.appendChild(editBtn);
@@ -157,23 +201,6 @@
                 updateDom(data)
                 titleInput.value = "";
             })
-
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
     })
 </script>
 </body>
