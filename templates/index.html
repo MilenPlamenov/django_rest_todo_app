@@ -116,11 +116,21 @@
         spanTitle.classList.add("title");
         spanTitle.innerHTML = task.name;
 
+
+        let editInputGroup = document.createElement('div');
+        editInputGroup.classList.add("input-group");
         let editInput = document.createElement('input');
+        editInput.classList.add("form-control");
+
+
+        let editInputGroupBtn = document.createElement('div');
+        editInputGroupBtn.classList.add("input-group-append")
 
         editInput.setAttribute("type", "hidden");
         let editActionBtn = document.createElement('button');
-        editActionBtn.innerHTML = "Finalize";
+        editActionBtn.classList.add("btn");
+        editActionBtn.classList.add("btn-outline-primary");
+        editActionBtn.innerHTML = "Edit";
         editActionBtn.style.display = "none";
 
         let editDiv = document.createElement('div');
@@ -135,13 +145,16 @@
 
             editInput.removeAttribute("type");
             editActionBtn.style.display = "block";
+            editBtn.style.display = "none";
+            deleteBtn.style.display = "none"
+            spanTitle.style.display = "none";
             editInput.value = task.name;
             editActionBtn.addEventListener("click", () => {
                 const url = `http://127.0.0.1:8000/api/todo-retrieve-update-destroy/${task.id}/`;
                 const csrftoken = getCookie('csrftoken');
                 let obj = JSON.stringify({name: editInput.value});
                 fetch(url, {
-                    method: "PUT",
+                    method: "PATCH",
                     headers: {
                         'Content-type': 'application/json',
                         'X-CSRFToken': csrftoken,
@@ -155,6 +168,9 @@
                     })
                 editInput.setAttribute("type", "hidden");
                 editActionBtn.style.display = "none";
+                spanTitle.style.display = "block";
+                editBtn.style.display = "block";
+                deleteBtn.style.display = "block";
             })
 
         })
@@ -180,9 +196,12 @@
             deleteBtn.parentElement.parentElement.remove()
         })
 
+
         divTitle.appendChild(spanTitle);
-        divTitle.appendChild(editInput);
-        divTitle.appendChild(editActionBtn);
+        editInputGroup.appendChild(editInput);
+        editInputGroupBtn.appendChild(editActionBtn);
+        editInputGroup.appendChild(editInputGroupBtn);
+        divTitle.appendChild(editInputGroup);
         editDiv.appendChild(editBtn);
         deleteDiv.appendChild(deleteBtn);
 
