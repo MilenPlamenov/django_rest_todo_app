@@ -30,6 +30,9 @@ function updateDom(task) {
     let spanTitle = document.createElement('span');
     spanTitle.classList.add("title");
     spanTitle.innerHTML = task.name;
+    if (task.state) {
+        spanTitle.classList.add("text-decoration-line-through");
+    }
 
 
     let editInputGroup = document.createElement('div');
@@ -67,6 +70,7 @@ function updateDom(task) {
         editBtn.style.display = "none";
         deleteBtn.style.display = "none"
         spanTitle.style.display = "none";
+        doneBtn.style.display = "none";
         editInput.value = task.name;
         editActionBtn.addEventListener("click", () => {
             const url = `http://127.0.0.1:8000/api/todo-retrieve-update-destroy/${task.id}/`;
@@ -98,6 +102,7 @@ function updateDom(task) {
             spanTitle.style.display = "block";
             editBtn.style.display = "block";
             deleteBtn.style.display = "block";
+            doneBtn.style.display = "block";
         })
 
     })
@@ -120,7 +125,35 @@ function updateDom(task) {
                 'X-CSRFToken': csrftoken,
             },
         })
-        deleteBtn.parentElement.parentElement.remove()
+        deleteBtn.parentElement.parentElement.remove();
+    })
+
+
+    let doneDiv = document.createElement('div');
+    doneDiv.setAttribute("style", "flex:1");
+    let doneBtn = document.createElement('button');
+    doneBtn.innerHTML = "Done";
+    doneBtn.classList.add("btn");
+    doneBtn.classList.add("btn-sm");
+    doneBtn.classList.add("btn-outline-info");
+    doneBtn.classList.add("edit");
+    doneBtn.addEventListener("click", () => {
+        const url = `http://127.0.0.1:8000/api/todo-retrieve-update-destroy/${task.id}/`;
+        const csrftoken = getCookie('csrftoken');
+        let obj = JSON.stringify({state: true});
+        fetch(url, {
+            method: "PATCH",
+            headers: {
+                'Content-type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: obj,
+        })
+            .then(response => response.json())
+            .then((data) => {
+                task.state = data.state;
+                spanTitle.classList.add("text-decoration-line-through");
+            })
     })
 
 
@@ -132,9 +165,13 @@ function updateDom(task) {
     editDiv.appendChild(editBtn);
     deleteDiv.appendChild(deleteBtn);
 
+    doneDiv.appendChild(doneBtn);
+
     mainDivEl.appendChild(divTitle);
+    mainDivEl.appendChild(doneDiv);
     mainDivEl.appendChild(editDiv);
     mainDivEl.appendChild(deleteDiv);
+
 
     listWrapperEl.appendChild(mainDivEl);
 }
